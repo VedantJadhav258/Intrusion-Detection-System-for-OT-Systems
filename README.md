@@ -49,10 +49,3 @@ The architecture is inspired by recent IIoT and industrial security literature (
 2. **Detect**: IdsCore flags anomalies (e.g., SYN floods or unauthorized Modbus writes).
 3. **Alert**: Alerts are pushed to the dashboard via WebSocket/SSE.
 4. **Act**: PlcController opens a Modbus TCP connection and writes a pre-configured safe-state value to halt processes safely.
-
-
----
-
-If you'd like, I can also:
-- Add badges (build/license) to the top of the README.
-- Expand the docs with a contributing guide and a deployment walkthrough.
