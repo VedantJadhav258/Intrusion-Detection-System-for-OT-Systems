@@ -18,24 +18,7 @@ The architecture is inspired by recent IIoT and industrial security literature (
 - Localized Modbus TCP DPI to whitelist allowed function codes and protect critical registers.
 - Zero-trust micro-segmentation by using microcontrollers as protective gateways for legacy PLCs.
 
-## Project Structure
 
-```
-OT-EdgeIDS/
-├── data/
-│   └── index.html           # Real-time control dashboard UI (HTML/JS/CSS)
-├── docs/
-│   ├── architecture.png     # Network topology diagrams
-│   └── threat_model.md      # Detailed threat vectors and mitigations
-├── src/
-│   ├── main.cpp             # Main system loop and hardware init
-│   ├── NetworkMonitor.h     # Packet sniffing and promiscuous mode logic
-│   ├── IdsCore.h            # Threat detection engine (DoS, malware signatures)
-│   ├── PlcController.h      # Modbus TCP client for Safe-Mode engagement
-│   └── WebDashboard.h       # WebServer.h implementation and API routes
-├── platformio.ini           # PlatformIO configuration file
-└── README.md
-```
 
 ## Hardware Requirements
 
