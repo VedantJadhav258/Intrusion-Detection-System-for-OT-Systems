@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OT Network IDS Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .radar-scan {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 2px solid #10B981;
+            position: relative;
+            overflow: hidden;
+        }
+        .radar-scan::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.5));
+            transform-origin: 0 0;
+            animation: scan 2s linear infinite;
+        }
+        .radar-danger { border-color: #EF4444; }
+        .radar-danger::before { background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.5)); }
+        
+        @keyframes scan {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans min-h-screen p-6">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="flex justify-between items-center border-b border-gray-700 pb-4 mb-6">
+            <div>
+                <h1 class="text-3xl font-bold text-white">Edge IDS Control Dashboard</h1>
+                <p class="text-gray-400 text-sm mt-1">Real-time OT Network Monitoring</p>
+            </div>
+            <div id="connection-status" class="flex items-center text-sm font-semibold text-green-400">
+                <span class="w-3 h-3 rounded-full bg-green-500 mr-2 animate-pulse"></span>
+                System Online
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Status Panel -->
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 flex flex-col items-center justify-center">
+                <div id="radar" class="radar-scan mb-4"></div>
+                <h2 id="network-status-text" class="text-xl font-bold text-green-400">Network Secure</h2>
+                <p class="text-gray-400 text-xs mt-2">Active Promiscuous Monitoring</p>
+            </div>
+
+            <!-- Threat Metrics -->
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 md:col-span-2">
+                <h3 class="text-lg font-semibold mb-4 text-gray-300">Security Metrics</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-gray-700 p-4 rounded-lg">
+                        <p class="text-gray-400 text-xs uppercase tracking-wider">Total Alerts</p>
+                        <p id="alert-count" class="text-3xl font-bold text-white mt-1">0</p>
+                    </div>
+                    <div class="bg-gray-700 p-4 rounded-lg">
+                        <p class="text-gray-400 text-xs uppercase tracking-wider">PLC State</p>
+                        <p id="plc-state" class="text-2xl font-bold text-green-400 mt-1">Normal / Run</p>
+                    </div>
+                </div>
+                <div class="mt-4 bg-gray-700 p-4 rounded-lg">
+                    <p class="text-gray-400 text-xs uppercase tracking-wider mb-1">Latest Threat Signature</p>
+                    <p id="latest-threat" class="text-sm font-mono text-gray-300">Scanning for anomalies...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="mt-6 bg-gray-800 p-6 rounded-xl border border-gray-700 flex justify-between items-center">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-300">Manual Override</h3>
+                <p class="text-gray-400 text-sm">Reset the system after verifying the OT environment is secure.</p>
+            </div>
+            <button onclick="resetSystem()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
+                Acknowledge & Reset
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Use the ESP32 IP address here if testing from a PC, or empty string if hosted on the ESP32
+        const API_BASE = ""; 
+
+        async function fetchStatus() {
+            try {
+                // Mock API for preview environment, replace API_BASE with actual endpoint in production
+                // const response = await fetch(API_BASE + '/api/status');
+                // const data = await response.json();
+                
+                // Simulation for the preview window:
+                const data = {
+                    alerts: Math.random() > 0.95 ? 1 : 0, 
+                    latestThreat: "None", 
+                    safeMode: false
+                };
+
+                // Update UI based on data
+                document.getElementById('alert-count').innerText = data.alerts;
+                document.getElementById('latest-threat').innerText = data.latestThreat;
+
+                const radar = document.getElementById('radar');
+                const statusText = document.getElementById('network-status-text');
+                const plcState = document.getElementById('plc-state');
+
+                if (data.safeMode || data.alerts > 0) {
+                    radar.classList.remove('radar-scan');
+                    radar.classList.add('radar-scan', 'radar-danger');
+                    statusText.innerText = "THREAT DETECTED";
+                    statusText.classList.replace('text-green-400', 'text-red-500');
+                    plcState.innerText = "SAFE-MODE ENGAGED";
+                    plcState.classList.replace('text-green-400', 'text-red-500');
+                    document.getElementById('latest-threat').innerText = "CRITICAL: Unauthorized Access Detected";
+                    document.getElementById('latest-threat').classList.replace('text-gray-300', 'text-red-400');
+                }
+
+            } catch (error) {
+                console.error("Error fetching status", error);
+                document.getElementById('connection-status').innerHTML = '<span class="w-3 h-3 rounded-full bg-red-500 mr-2"></span> Offline';
+            }
+        }
+
+        async function resetSystem() {
+            try {
+                // Production: await fetch(API_BASE + '/api/reset', { method: 'POST' });
+                
+                // Reset UI
+                const radar = document.getElementById('radar');
+                const statusText = document.getElementById('network-status-text');
+                const plcState = document.getElementById('plc-state');
+
+                radar.classList.remove('radar-danger');
+                statusText.innerText = "Network Secure";
+                statusText.classList.replace('text-red-500', 'text-green-400');
+                plcState.innerText = "Normal / Run";
+                plcState.classList.replace('text-red-500', 'text-green-400');
+                document.getElementById('latest-threat').innerText = "System Reset by Admin";
+                document.getElementById('latest-threat').classList.replace('text-red-400', 'text-gray-300');
+                document.getElementById('alert-count').innerText = "0";
+
+            } catch (error) {
+                console.error("Error resetting system", error);
+            }
+        }
+
+        // Poll every 2 seconds
+        setInterval(fetchStatus, 2000);
+    </script>
+</body>
+</html>
